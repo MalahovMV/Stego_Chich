@@ -3,6 +3,9 @@ import PyPDF2
 from reportlab.pdfgen import canvas
 import io
 from reportlab.pdfbase import pdfmetrics, ttfonts
+import hmac
+import hashlib
+import base64
 
 '''
 Словарь схожих по написанию букв в английском и русском языке
@@ -11,9 +14,25 @@ from reportlab.pdfbase import pdfmetrics, ttfonts
 letter_dict = {'A':'А', 'a':'а', 'E':'Е', 'e':'е', 'T':'Т', 'O':'О', 'o':'о', 'P':'Р',
                'p':'р', 'H':'Н', 'K':'К', 'X':'Х', 'x':'х', 'C':'С', 'c':'с', 'B':'В', 'M':'М'}
 
-bynary_line = [1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1]
 
-def replacement_letter(line, pointer_bynary):
+def creat_key(login, password):
+    bynary_line = []
+    for el in hmac.new(b'1234567890', msg=(login + password).encode('utf-8'), digestmod=hashlib.md5).digest():
+        s = str(bin(el))[2:]
+        while len(s) < 8:
+            s = '0' + s
+
+        for elem in s:
+            if elem == '1':
+                bynary_line.append(1)
+
+            else:
+                bynary_line.append(0)
+
+    return bynary_line
+
+
+def replacement_letter(line, pointer_bynary, bynary_line):
     out_line = ''
     for el in line:
         if (el in letter_dict.keys()) and (pointer_bynary < len(bynary_line)):
@@ -30,7 +49,9 @@ def replacement_letter(line, pointer_bynary):
 
     return out_line, pointer_bynary
 
-def new_information():
+
+def new_information(login, password):
+    bynary_line = creat_key(login, password)
     pdfmetrics.registerFont(ttfonts.TTFont('Arial', 'arial.ttf'))
     packet = io.BytesIO()
     can = canvas.Canvas(packet)
@@ -39,10 +60,11 @@ def new_information():
     next_line = 0
     pointer_bynary_line = 0
     for line in file:
-        out_line, pointer_bynary_line = replacement_letter(line[:-1], pointer_bynary_line)
+        out_line, pointer_bynary_line = replacement_letter(line[:-1], pointer_bynary_line, bynary_line)
         can.drawString(10, 800 - next_line, out_line)
         next_line += 12
 
+    print(pointer_bynary_line)
     file.close()
     can.showPage()
     can.save()
@@ -51,20 +73,23 @@ def new_information():
     return new_pdf
 
 
-def main(in_file):
-    new_pdf = new_information()
-    text_page = new_pdf.getPage(0).extractText()
+def main(in_file, login, password):
+    new_pdf = new_information(login, password)
     in_pdf = PyPDF2.PdfFileReader(open(in_file, 'rb'))
     output = PyPDF2.PdfFileWriter()
     for i in range(in_pdf.getNumPages()):
         output.addPage(in_pdf.getPage(i))
 
     output.addPage(new_pdf.getPage(0))
+    output.encrypt('Cypher_key')
     file = open('Test.pdf', 'wb')
-    #output.encrypt('qwerty')
     output.write(file)
     file.close()
 
+
 if __name__ == '__main__':
     in_file = 'Base_PDF/idiot.pdf'
-    main(in_file)
+    login = 'Mikle'
+    password = 'Qwer123'
+    main(in_file, login, password)
+

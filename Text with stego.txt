@@ -1,7 +1,10 @@
 This text is automat created.
-This is defended book.
-
-Project was created by students from group IU8-81.
+Our project has name a "Stegonography in PDF format"
+This project realiz the defend for elecronical books in PDF format.
+Project was created by students from group IU8-81
+Bauman govenment technical university in Moscow Russian Federation.
+The book, which you were reading, are protected with help our depend.
+Thank for your attention.
 Authors:
 Litvinenko Darya
 Samrega Aleksander
