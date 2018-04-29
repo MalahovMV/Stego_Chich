@@ -1,3 +1,8 @@
 This text is automat created.
-This is dended book.
-Yse
+This is defended book.
+
+Project was created by students from group IU8-81.
+Authors:
+Litvinenko Darya
+Samrega Aleksander
+Malakhov Mikhail
